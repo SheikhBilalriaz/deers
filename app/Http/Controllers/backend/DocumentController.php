@@ -15,9 +15,10 @@ class DocumentController extends Controller
     {
         // Validate the request to ensure all necessary data is provided
         $request->validate([
+            'name' => 'required|string|max:255',
             'file' => 'required|file|mimes:pdf,doc,docx,jpg,png,xls,xlsx|max:50000',
-            'user_id' => 'required|integer|exists:users,id',
-            'department' => 'required|string|max:255',
+            'user_id' => 'required|exists:users,id',
+            'department_id' => 'required|exists:departsments,id',
         ]);
 
         // Fetch user and their subscription details
@@ -66,9 +67,9 @@ class DocumentController extends Controller
 
             // Store document data in the database
             $document = Document::create([
-                'user_id' => $request->user_id,
-                'name' => $generatedName,
-                'department' => $request->input('department'),
+                'user_id' => $request->input('user_id'),
+                'name' => $request->input('name'),
+                'department_id' => $request->input('department_id'),
                 'file_path' => $path,
             ]);
 
