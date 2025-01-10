@@ -13,13 +13,16 @@ class opt_sender extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $mailData;
+    public $user;
+    public $otp;
+
     /**
      * Create a new message instance.
      */
-    public function __construct($mailData)
+    public function __construct($user, $otp)
     {
-        $this->mailData = $mailData;
+        $this->user = $user;
+        $this->otp = $otp;
     }
 
     /**
@@ -28,7 +31,7 @@ class opt_sender extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Opt Verification',
+            subject: 'Deers - Verify Your Email',
         );
     }
 
@@ -39,6 +42,7 @@ class opt_sender extends Mailable
     {
         return new Content(
             view: 'Email.otp',
+            with: ['otp' => $this->otp, 'user' => $this->user]
         );
     }
 

@@ -17,6 +17,7 @@ class Subscription extends Model
         'can_store_documents',
         'can_make_appointments',
         'can_upload_documents',
+        'price_id',
     ];
 
     public function subscription()

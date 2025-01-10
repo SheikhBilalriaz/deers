@@ -31,7 +31,9 @@ class User extends Authenticatable implements JWTSubject
         'phone_number',
         'years_of_experience',
         'rank',
-        'branch'
+        'branch',
+        'is_verified',
+        'email_verified_at'
     ];
 
     /**

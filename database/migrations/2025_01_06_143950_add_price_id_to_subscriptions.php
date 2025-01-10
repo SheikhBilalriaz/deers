@@ -11,13 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('email_verifications', function (Blueprint $table) {
-            $table->id();
-            $table->string('email')->index();
-            $table->string('otp');
-            $table->timestamps();
+        Schema::table('subscriptions', function (Blueprint $table) {
+            $table->string("stripe_price_id")->nullable(true);
         });
-
     }
 
     /**
@@ -25,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('email_verifications');
+        Schema::table('subscriptions', function (Blueprint $table) {
+            $table->dropColumn("stripe_price_id");
+        });
     }
 };

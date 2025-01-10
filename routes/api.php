@@ -7,15 +7,24 @@ use App\Http\Controllers\backend\DepartmentController;
 use App\Http\Controllers\backend\AnnouncementController;
 use App\Http\Controllers\backend\EquipmentController;
 use App\Http\Controllers\Auth\RegisterController;
-
+use App\Http\Controllers\backend\SubscriptionController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
 // })->middleware('auth:sanctum');
 
+Route::post('app-register', [App\Http\Controllers\Auth\RegisterController::class, 'apiRegister']); //Done
 
-Route::post('app-register', [App\Http\Controllers\Auth\RegisterController::class, 'apiRegister']);
-Route::post('app-login', [App\Http\Controllers\Auth\LoginController::class, 'appLogin']);
+Route::prefix('otp')->group(function () {
+    Route::post("/resend-otp" , [RegisterController::class,'resendOtp']); //Done
+    Route::post("/verified-Otp" , [RegisterController::class,'verifiedOtp']); //Done
+    // Route::post("/otp-verify" , [RegisterController::class,'verify_otp']);
+});
+
+Route::post('app-login', [App\Http\Controllers\Auth\LoginController::class, 'appLogin']); //Done
+
+Route::post('/subscribe', [SubscriptionController::class, 'subscribe'])->middleware('auth:api'); //Done
+
 Route::post('upload-document', [App\Http\Controllers\backend\DocumentController::class, 'upload']);
 Route::get('user-document', [App\Http\Controllers\backend\DocumentController::class, 'userDocs']);
 Route::get('department-users', [App\Http\Controllers\backend\AppointmentController::class, 'departmentUers']);
@@ -30,9 +39,3 @@ Route::apiResource('appointments', AppointmentController::class);
 Route::get('user-appointments/{id}', [AppointmentController::class, 'userAppointment']);
 Route::get('/departments/{id}/availability/{date}', [AppointmentController::class, 'checkAvailability']);
 Route::get('/equipments/department/{department_id}', [EquipmentController::class, 'getEquipmentByDepartmentID']);
-
-Route::prefix('otp')->group(function () {
-    Route::post("/otp-verify" , [RegisterController::class,'verify_otp']);
-    Route::post("/verified-Otp" , [RegisterController::class,'verifiedOtp']);
-    Route::post("/resend-top" , [RegisterController::class,'resendOtp']);
-});

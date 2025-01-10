@@ -25,7 +25,7 @@ class AdminController extends Controller
             'title' => ' Dashboard |  Deers Admin Dashboard'
         ];
 
-        return view('backend.dashboard' ,$data);
+        return view('backend.dashboard', $data);
     }
 
     public function members()
@@ -47,7 +47,7 @@ class AdminController extends Controller
             'alldepartments' => $alldepartments,
         ];
 
-        return view('backend.add-member' ,$data);
+        return view('backend.add-member', $data);
     }
     public function edit_members(User $user)
     {
@@ -58,7 +58,7 @@ class AdminController extends Controller
             'user' => $user,
         ];
 
-        return view('backend.edit-members' ,$data);
+        return view('backend.edit-members', $data);
     }
 
     public function edit_members_submit(Request $request, User $user)
@@ -77,9 +77,9 @@ class AdminController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        if($request->has('status')){
+        if ($request->has('status')) {
             $status = 'active';
-        }else{
+        } else {
             $status = 'inactive';
         }
 
@@ -152,20 +152,20 @@ class AdminController extends Controller
             'title' => ' Add Appointment | Deers Admin Dashboard'
         ];
 
-        return view('backend.add-appointment' ,$data);
+        return view('backend.add-appointment', $data);
     }
 
     public function appointments()
     {
         // $appointments = Appointment::get();
         $appointments = Appointment::with(['department', 'user'])->get();
-        
+
         $data  = [
             'title' => ' Appointments | Deers Admin Dashboard',
             'appointments' => $appointments,
         ];
 
-        return view('backend.appointments' ,$data);
+        return view('backend.appointments', $data);
     }
 
 
@@ -176,7 +176,7 @@ class AdminController extends Controller
             'title' => ' Locations | Deers Admin Dashboard'
         ];
 
-        return view('backend.locations' ,$data);
+        return view('backend.locations', $data);
     }
 
 
@@ -188,7 +188,7 @@ class AdminController extends Controller
             'title' => ' Add Location | Deers Admin Dashboard'
         ];
 
-        return view('backend.add-location' ,$data);
+        return view('backend.add-location', $data);
     }
 
     public function subcsription()
@@ -198,7 +198,7 @@ class AdminController extends Controller
             'title' => ' Subscription | Deers Admin Dashboard'
         ];
 
-        return view('backend.subscription' ,$data);
+        return view('backend.subscription', $data);
     }
 
     public function reports()
@@ -208,7 +208,7 @@ class AdminController extends Controller
             'title' => ' Reports | Deers Admin Dashboard'
         ];
 
-        return view('backend.reports' ,$data);
+        return view('backend.reports', $data);
     }
 
     public function invoices()
@@ -218,7 +218,7 @@ class AdminController extends Controller
             'title' => ' Invoices | Deers Admin Dashboard'
         ];
 
-        return view('backend.invoices' ,$data);
+        return view('backend.invoices', $data);
     }
 
 
@@ -229,7 +229,7 @@ class AdminController extends Controller
             'title' => ' Messages | Deers Admin Dashboard'
         ];
 
-        return view('backend.messages' ,$data);
+        return view('backend.messages', $data);
     }
 
 
@@ -240,8 +240,6 @@ class AdminController extends Controller
             'title' => ' Inbox | Deers Admin Dashboard'
         ];
 
-        return view('backend.inbox' ,$data);
+        return view('backend.inbox', $data);
     }
-
-
 }
