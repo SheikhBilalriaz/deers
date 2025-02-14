@@ -16,9 +16,9 @@ class AdminController extends Controller
 {
     public function __construct()
     {
-        // $this->middleware(AdminMiddleware::class);
         $this->middleware('auth');
     }
+    
     public function dashboard()
     {
         $data  = [
@@ -219,27 +219,5 @@ class AdminController extends Controller
         ];
 
         return view('backend.invoices', $data);
-    }
-
-
-    public function messages()
-    {
-        $data  = [
-
-            'title' => ' Messages | Deers Admin Dashboard'
-        ];
-
-        return view('backend.messages', $data);
-    }
-
-
-    public function inbox()
-    {
-        $data  = [
-
-            'title' => ' Inbox | Deers Admin Dashboard'
-        ];
-
-        return view('backend.inbox', $data);
     }
 }

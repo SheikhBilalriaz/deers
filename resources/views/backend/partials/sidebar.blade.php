@@ -1,7 +1,7 @@
 <div class="side_menu">
 	<ul class="main-menu">
-        <li class="menu-item {{ Request::routeIs('home') ? 'active' : '' }}">
-            <a href="{{ route('home') }}" class="nav-link">Dashboard</a>
+        <li class="menu-item {{ Request::routeIs('admin.home') ? 'active' : '' }}">
+            <a href="{{ route('admin.home') }}" class="nav-link">Dashboard</a>
         </li>
         <li class="menu-item {{ Request::routeIs('members') ? 'active' : '' }}">
             <a href="{{ route('members') }}" class="nav-link">Members</a>
@@ -27,12 +27,12 @@
         <li class="menu-item {{ Request::routeIs('invoices') ? 'active' : '' }}">
             <a href="{{ route('invoices') }}" class="nav-link">Invoices</a>
         </li>
-        <li class="menu-item {{ Request::routeIs('inbox') ? 'active' : '' }}">
-            <a href="{{ route('inbox') }}" class="nav-link">Inbox</a>
+        <li class="menu-item {{ Request::routeIs('admin.messages') ? 'active' : '' }}">
+            <a href="{{ route('admin.messages') }}" class="nav-link">Messages</a>
         </li>
 
         {{--		<li class="menu-item">--}}
-{{--			<a href="{{route('home')}}" class="nav-link">Settings</a>--}}
+{{--			<a href="{{route('admin.home')}}" class="nav-link">Settings</a>--}}
 {{--		</li>--}}
 		<li class="menu-item">
 			<a href="javascript:;" class="nav-link">

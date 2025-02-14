@@ -15,23 +15,62 @@ use Illuminate\Support\Facades\Log;
 use Stripe\Customer;
 use Stripe\Stripe;
 
+/*
+|----------------------------------------------------------------------
+| Login Controller
+|----------------------------------------------------------------------
+|
+| This controller handles authenticating users for the application and
+| redirecting them to your home screen. The controller uses a trait
+| to conveniently provide its functionality to your applications.
+|
+*/
+
 class LoginController extends Controller
 {
     use AuthenticatesUsers;
 
-    /**
-     * Where to redirect users after login from web application.
-     *
-     * @var string
-     */
     protected $redirectTo = '/';
 
-    /**
-     * Constructor for the LoginController.
-     */
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
+        $this->middleware('auth')->only('logout');
+    }
+
+    protected function validateLogin(Request $request)
+    {
+        return Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+    }
+
+    public function login(Request $request)
+    {
+        if (!Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+            return redirect()->route('login')
+                ->withErrors(['email' => 'Invalid credentials.']);
+        }
+
+        $user = Auth::user();
+
+        if ($user->role === 'admin') {
+            return redirect()->intended($this->redirectTo);
+        }
+
+        Auth::logout();
+        return redirect()->route('login')
+            ->withErrors(['email' => 'Unauthorized to access this dashboard.']);
+    }
+
+    public function logout(Request $request)
+    {
+        $this->guard()->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('login');
     }
 
     /**
@@ -101,53 +140,5 @@ class LoginController extends Controller
 
             return response()->json(['success' => false, 'message' => 'An unexpected error occurred. Please try again later.'], 500);
         }
-    }
-
-    /**
-     * Handle login requests for the web application.
-     */
-    public function login(Request $request)
-    {
-        // Validate the login request
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->route('login')
-                ->withErrors($validator)
-                ->withInput();
-        }
-
-        // Attempt to authenticate the user
-        if (!Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
-            return redirect()->route('login')
-                ->withErrors(['email' => 'Invalid credentials.']);
-        }
-
-        $user = Auth::user();
-
-        // Check if the authenticated user is an admin
-        if ($user->role === 'admin') {
-            return redirect()->intended($this->redirectTo);
-        }
-
-        // Logout the user if they are not an admin
-        Auth::logout();
-        return redirect()->route('login')
-            ->withErrors(['email' => 'Unauthorized to access this dashboard.']);
-    }
-
-    /**
-     * Log the user out of the application.
-     */
-    public function logout(Request $request)
-    {
-        $this->guard()->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return redirect('login');
     }
 }
