@@ -8,8 +8,9 @@ use Illuminate\Support\Facades\Auth;
 
 Auth::routes();
 
-Route::get('/messages', [ChatController::class, 'messages'])->name('admin.messages');
+Route::get('/messages/{page}', [ChatController::class, 'messages'])->name('admin.messages');
 Route::get('/get-messages/{conversation_id}/{page}', [ChatController::class, 'getMessages'])->name('admin.get-messages');
+Route::get('/search-chats', [ChatController::class, 'searchChats'])->name('admin.search-chats');
 
 Route::get('/conversations', [ChatController::class, 'conversation_view_page'])->name('admin.conversations');
 Route::get('/', [AdminController::class, 'dashboard'])->name('admin.home');
