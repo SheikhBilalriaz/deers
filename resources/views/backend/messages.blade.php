@@ -10,29 +10,34 @@
     </script>
     <script src="{{ asset('dashboard_assets/js/messages.js') }}"></script>
     <style>
-        .loader {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: rgba(255, 255, 255, 0.7);
-            z-index: 999;
-            display: none;
-            padding-top: 50%;
-            padding-left: 50%;
-        }
-
-        .spinner {
+        .chatListLoader {
             border: 4px solid #f3f3f3;
             border-top: 4px solid #3498db;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 30px;
+            height: 30px;
             animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+
+        .messageListLoader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+
+        .userListLoader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
         }
 
         @keyframes spin {
@@ -43,6 +48,23 @@
             100% {
                 transform: rotate(360deg);
             }
+        }
+
+        .stacked-images {
+            display: flex;
+            align-items: center;
+        }
+
+        .stacked-images .profile-img {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            margin-left: -10px;
+        }
+
+        .stacked-images .profile-img:first-child {
+            margin-left: 0;
         }
     </style>
     <div class="content">
@@ -62,75 +84,18 @@
                             </div>
                             <div class="row">
                                 <div class="col-12 col-md-4">
-                                    <div class="msg_sidebar">
+                                    <div class="msg_sidebar" id="chat_conversation_sidebar">
                                         <div class="search_msg">
                                             <form action="">
                                                 <div class="field">
-                                                    <input type="text" name="search_msg" class="form-control"
-                                                        placeholder="Search" id="search_msg">
+                                                    <input type="text" name="search_chat" class="form-control"
+                                                        placeholder="Search" id="search_chat">
                                                     <input type="submit" name="submit" class="btn_submit">
                                                 </div>
                                             </form>
                                         </div>
-                                        <ul class="conversations">
-                                            @foreach ($chats as $index => $chat)
-                                                @php
-                                                    $participants = $chat->participants->map(function ($participant) {
-                                                        return [
-                                                            'name' => $participant->user->name ?? 'Unknown',
-                                                            'email' => $participant->user->email ?? 'No email',
-                                                        ];
-                                                    });
-
-                                                    $participantNames = $participants->pluck('name')->toArray();
-                                                    $participantEmails = $participants->pluck('email')->toArray();
-                                                    $count = count($participants);
-                                                @endphp
-                                                <li class="{{ $index == 0 ? 'active' : '' }}"
-                                                    id="{{ 'chat-' . $chat->id }}">
-                                                    <a href="javascript:;">
-                                                        <div class="info">
-                                                            <img src="dashboard_assets/images/thumb.png" alt="">
-                                                            <h4>
-                                                                @if ($count == 1)
-                                                                    {{ $participantNames[0] }}
-                                                                @elseif($count == 2)
-                                                                    {{ implode(' & ', $participantNames) }}
-                                                                @elseif($count > 2)
-                                                                    {{ $participantNames[0] }}, {{ $participantNames[1] }} &
-                                                                    more...
-                                                                @else
-                                                                    No participants
-                                                                @endif
-                                                            </h4>
-                                                            <p>
-                                                                @if ($count == 1)
-                                                                    {{ $participantEmails[0] }}
-                                                                @elseif($count == 2)
-                                                                    {{ implode(' & ', $participantEmails) }}
-                                                                @elseif($count > 2)
-                                                                    {{ $participantEmails[0] }},
-                                                                    {{ $participantEmails[1] }}
-                                                                    & more...
-                                                                @else
-                                                                    No participants
-                                                                @endif
-                                                            </p>
-                                                        </div>
-                                                        <div class="time_ago">
-                                                            <span class="time">
-                                                                {{ $chat->lastMessage->created_at->diffForHumans() }}
-                                                            </span>
-                                                            @if ($chat->unreadMessages->count() > 0)
-                                                                <span class="notif">
-                                                                    {{ $chat->unreadMessages->count() }}
-                                                                </span>
-                                                            @endif
-                                                        </div>
-                                                    </a>
-                                                </li>
-                                            @endforeach
-                                        </ul>
+                                        <ul class="conversations"></ul>
+                                        <div id="chatListLoader" class="chatListLoader" style="display: block;"></div>
                                     </div>
                                 </div>
                                 <div class="col-12 col-md-8">
@@ -138,28 +103,26 @@
                                         <div class="msg_head">
                                             <div class="user_info">
                                                 <h2>
-                                                    <img src="dashboard_assets/images/thumb.png" alt="">
+                                                    <span id="profile_images"></span>
                                                     <span id="receiver_name"></span>
                                                 </h2>
                                                 <p class="green">Active</p>
                                             </div>
                                             <div class="email">
-                                                <p>
-                                                    Email
-                                                    <br>
-                                                    <a href="javascript:;" id="receiver_email"></a>
+                                                <p>Email
+                                                <div id="receiver_email"></div>
                                                 </p>
                                             </div>
                                         </div>
-                                        <div class="msg_body chat-container" style="position: relative;">
-                                            <div class="loader">
-                                                <div class="spinner"></div>
+                                        <div class="msg_body chat-container">
+                                            <div class="messageListLoader" id="messageListLoader" style="display: none;">
                                             </div>
                                         </div>
                                         <div class="msg_input">
-                                            <form action="" class="form">
+                                            <form class="form" id="send-message">
+                                                @csrf
                                                 <div class="field">
-                                                    <textarea class="form-control" name="typing" id="typing" placeholder="Type a message" required></textarea>
+                                                    <textarea class="form-control" name="typing" id="typing" placeholder="Type a message"></textarea>
                                                 </div>
                                                 <div class="btn_type">
                                                     <div class="upload">
@@ -189,7 +152,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                    <h5 class="modal-title" id="addMemberModalLabel">Start New Conversation</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -197,29 +160,14 @@
                 <div class="modal-body">
                     <form action="">
                         <div class="field">
-                            <input type="text" name="search_msg" class="form-control" placeholder="Search"
-                                id="search_msg">
+                            <input type="text" name="search_user" class="form-control" placeholder="Search"
+                                id="search_user">
                         </div>
                     </form>
-                    <ul>
-                        @foreach ($users as $index => $user)
-                            <li id="{{ 'user-' . $user->id }}">
-                                <a>
-                                    <div class="info">
-                                        <img src="dashboard_assets/images/thumb.png" alt="">
-                                        <h4>{{ $user->name }}</h4>
-                                    </div>
-                                </a>
-                            </li>
-                        @endforeach
-                    </ul>
+                    <ul class="user-list"></ul>
+                    <div id="userListLoader" class="userListLoader" style="display: none;"></div>
                 </div>
             </div>
         </div>
     </div>
-    <script>
-        var getMessagesRoute =
-            "{{ route('admin.get-messages', ['conversation_id' => ':conversation_id', 'page' => ':page']) }}";
-        var userId = "{{ Auth::user()->id }}";
-    </script>
 @endsection

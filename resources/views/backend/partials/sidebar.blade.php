@@ -27,8 +27,8 @@
         <li class="menu-item {{ Request::routeIs('invoices') ? 'active' : '' }}">
             <a href="{{ route('invoices') }}" class="nav-link">Invoices</a>
         </li>
-        <li class="menu-item {{ Request::routeIs('admin.messages') ? 'active' : '' }}">
-            <a href="{{ route('admin.messages') }}" class="nav-link">Messages</a>
+        <li class="menu-item {{ Request::routeIs('admin.messages-view') ? 'active' : '' }}">
+            <a href="{{ route('admin.messages-view') }}" class="nav-link">Messages</a>
         </li>
 
         {{--		<li class="menu-item">--}}

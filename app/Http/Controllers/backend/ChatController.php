@@ -4,10 +4,7 @@ namespace App\Http\Controllers\backend;
 
 use App\Http\Controllers\Controller;
 use App\Models\Conversation;
-use App\Models\Message;
-use App\Models\MessageParticipant;
-use App\Models\User;
-use Illuminate\Http\Request;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 
 class ChatController extends Controller
@@ -17,39 +14,113 @@ class ChatController extends Controller
         $this->middleware('auth');
     }
 
-    public function messages($page = 0)
+    public function fetchChats($page = 0)
     {
-        $user = Auth::user();
-        $conversations = Conversation::where('created_by', $user->id)
-            ->with('participants', 'createdBy', 'lastMessage', 'unreadMessages')
-            ->skip($page * 1)
-            ->take(1)
-            ->get();
-        if ($page > 0) return $conversations;
-        $users = User::where('id', '!=', $user->id)->get();
-        $data = [
-            'title' => ' Messages | Deers Admin Dashboard',
-            'chats' => $conversations,
-            'users' => $users
-        ];
-        return view('backend.messages', $data);
+        try {
+            // Get the authenticated user
+            $user = Auth::user();
+
+            // Retrieve conversations where the user is either the creator or a participant
+            $chats = Conversation::where(function ($query) use ($user) {
+                $query->where('created_by', $user->id)
+                    ->orWhereHas('participants', function ($subQuery) use ($user) {
+                        $subQuery->where('user_id', $user->id);
+                    });
+            })
+                // Load related data: participants, creator, last message, and unread messages
+                ->with(['participantsExceptMe', 'createdBy', 'lastMessage', 'unreadMessages'])
+                ->orderByDesc('updated_at')
+                ->skip($page * config('app.pagination.count'))
+                ->take(config('app.pagination.count'))
+                ->get();
+
+            // Return a JSON response with the chat data
+            return response()->json([
+                'success' => true,
+                'chats' => $chats
+            ], 200);
+        } catch (Exception $e) {
+            // Catch any unexpected errors and return a JSON error response
+            return response()->json([
+                'success' => false,
+                'error' => 'Something went wrong.',
+                // Include the error message only if debugging is enabled in .env for security reasons
+                'message' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
     }
 
-    public function getMessages($conversation_id, $page = 0)
+    public function fetchUserChat($userId)
     {
-        $messages = Message::where('conversation_id', $conversation_id)
-            ->with('files', 'sender')
-            ->orderBy('created_at', 'desc')
-            ->skip($page * 5)
-            ->take(5)
-            ->get();
-        foreach ($messages as $message) {
-            if ($message->sender->id !== Auth::user()->id) {
-                $message->read_at = now();
-                $message->save();
+        try {
+            // Get the currently authenticated user
+            $me = Auth::user();
+
+            // Find a private conversation between the authenticated user and the target user
+            $conversation = Conversation::where('type', 'private')
+                ->whereHas('participants', function ($query) use ($userId) {
+                    $query->where('user_id', $userId);
+                })
+                ->whereHas('participants', function ($query) use ($me) {
+                    $query->where('user_id', $me->id);
+                })
+                ->with(['participantsExceptMe', 'createdBy', 'lastMessage', 'unreadMessages'])
+                ->first();
+
+            if (!$conversation) {
+                return response()->json([
+                    'success' => true,
+                    'chat' => null,
+                ], 200);
             }
+
+            return response()->json([
+                'success' => true,
+                'chat' => $conversation
+            ], 200);
+        } catch (Exception $e) {
+            // Catch any unexpected errors and return a JSON error response
+            return response()->json([
+                'success' => false,
+                'error' => 'Something went wrong.',
+                // Include the error message only if debugging is enabled in .env for security reasons
+                'message' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
         }
-        return response()->json(['messages' => $messages]);
+    }
+
+    public function fetchRecentChats()
+    {
+        try {
+            // Get the authenticated user
+            $user = Auth::user();
+
+            $chats = Conversation::where(function ($query) use ($user) {
+                $query->where('created_by', $user->id)
+                    ->orWhereHas('participants', function ($subQuery) use ($user) {
+                        $subQuery->where('user_id', $user->id);
+                    });
+            })
+                ->whereHas('unreadMessages', function ($subQuery) use ($user) {
+                    $subQuery->where('sender_id', '!=', $user->id);
+                })
+                ->with(['participantsExceptMe', 'createdBy', 'lastMessage', 'unreadMessages'])
+                ->orderByDesc('updated_at')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'chats' => $chats
+            ], 200);
+        } catch (Exception $e) {
+            // Catch any unexpected errors and return a JSON error response
+            return response()->json([
+                'success' => false,
+                'error' => 'Something went wrong.',
+                // Include the error message only if debugging is enabled in .env for security reasons
+                'message' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
     }
 
     public function conversation_view_page()

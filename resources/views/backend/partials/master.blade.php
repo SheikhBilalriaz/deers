@@ -20,7 +20,6 @@
 <script type="text/javascript">
 
     var bars = document.querySelectorAll('.meter > span');
-    console.clear();
 
     setInterval(function(){
         bars.forEach(function(bar){

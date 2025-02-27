@@ -27,7 +27,13 @@ class Conversation extends Model
     }
     public function participants()
     {
-        return $this->hasMany(MessageParticipant::class, 'conversation_id');
+        return $this->hasMany(ConversationParticipant::class, 'conversation_id')->with('user');
+    }
+    public function participantsExceptMe()
+    {
+        return $this->hasMany(ConversationParticipant::class, 'conversation_id')
+            ->where('user_id', '!=', Auth::id())
+            ->with('user');
     }
     public function lastMessage()
     {

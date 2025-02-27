@@ -4,13 +4,22 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\backend\AdminController;
 use App\Http\Controllers\backend\ChatController;
 use App\Http\Controllers\backend\DepartmentController;
+use App\Http\Controllers\backend\MessageController;
+use App\Http\Controllers\backend\MessageViewController;
+use App\Http\Controllers\backend\UserController;
 use Illuminate\Support\Facades\Auth;
 
 Auth::routes();
 
-Route::get('/messages/{page}', [ChatController::class, 'messages'])->name('admin.messages');
-Route::get('/get-messages/{conversation_id}/{page}', [ChatController::class, 'getMessages'])->name('admin.get-messages');
-Route::get('/search-chats', [ChatController::class, 'searchChats'])->name('admin.search-chats');
+Route::get('/messages', [MessageViewController::class, 'messagesView'])->name('admin.messages-view'); //Done
+Route::get('/fetch-users/{onlyNonAdmin?}', [UserController::class, 'getUsers'])->name('admin.get-users'); //Done
+Route::get('/fetch-chats/{page?}', [ChatController::class, 'fetchChats'])->name('admin.fetch-chats'); //Done
+Route::get('/fetch-messages/{conversation_id}/{page?}', [MessageController::class, 'fetchMessages'])->name('admin.fetch-messages'); //Done
+Route::get('/fetch-user-chat/{user_id}', [ChatController::class, 'fetchUserChat'])->name('admin.fetch-user-chat'); //Done
+Route::get('/fetch-recent-messages/{conversation_id}', [MessageController::class, 'fetchRecentMessages'])->name('admin.fetch-recent-messages'); //Done
+Route::post('/send-message/{conversation_id?}/{user_id?}', [MessageController::class, 'sendMessage'])->name('admin.send-message'); //Done
+
+Route::get('/fetch-recent-chats', [ChatController::class, 'fetchRecentChats'])->name('admin.fetch-recent-chats');
 
 Route::get('/conversations', [ChatController::class, 'conversation_view_page'])->name('admin.conversations');
 Route::get('/', [AdminController::class, 'dashboard'])->name('admin.home');

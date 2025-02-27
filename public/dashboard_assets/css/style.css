@@ -1128,10 +1128,11 @@ table.dataTable td.dt-type-date {
   padding-left: 60px;
 }
 .inbox_sidebar,.msg_sidebar {
-  height: 100%;
+  height: 100vh;
   background: #EBF0F8;
   padding: 24px 22px;
   border-radius: 5px;
+  overflow-y: scroll;
 }
 .inbox_sidebar ul {
   list-style: none;
@@ -1685,4 +1686,19 @@ table.dataTable td.dt-type-date {
   .content{
     zoom:  0.8;
   }
+}
+
+.conversations>li.active {
+  background-color: #aeb8db40;
+  box-shadow: 2px 2px 7px solid #fff;
+  padding-left: 3px;
+  padding-right: 3px;
+}
+
+.conversations>li {
+  border-radius: 7px;
+}
+
+.conversations {
+  padding-top: 17px !important;
 }
